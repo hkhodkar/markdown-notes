@@ -24,16 +24,16 @@
     <span class="spacer"></span>
 
     @if (!trashed()) {
-      <span [class]="'save-state ' + saveState()" aria-live="polite">
+      <span [class]="'save-state ' + saveState()" [title]="saveState() === 'saved' ? 'All changes saved' : ''" aria-live="polite">
         @switch (saveState()) {
           @case ('saving') {
-            Saving…
+            <span class="saving-dot" aria-hidden="true"></span><span class="save-label">Saving…</span>
           }
           @case ('error') {
-            <app-icon name="alert" /> Not saved
+            <app-icon name="alert" /><span class="save-label">Not saved</span>
           }
           @default {
-            <app-icon name="saved" /> Saved
+            <app-icon name="saved" /><span class="save-label">Saved</span>
           }
         }
       </span>

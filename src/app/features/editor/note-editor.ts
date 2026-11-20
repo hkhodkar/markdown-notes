@@ -20,7 +20,7 @@ import { Clock } from '../../core/services/clock';
 import { NoteTransfer } from '../../core/services/note-transfer';
 import { Preferences } from '../../core/services/preferences';
 import { NotesStore } from '../../core/store/notes-store';
-import { fullDate, relativeTime } from '../../core/utils/date';
+import { fullDate, relativeTimeInline } from '../../core/utils/date';
 import { FormatAction, TextState, applyFormat, continueList, indentLines } from '../../core/utils/markdown-format';
 import { textStats } from '../../core/utils/note-text';
 import { toggleTask } from '../../core/utils/tasks';
@@ -360,7 +360,6 @@ export class NoteEditor {
   }
 
   protected edited(time: number, now: number): string {
-    const label = relativeTime(time, now);
-    return label === 'Just now' || label === 'Yesterday' ? label.toLowerCase() : label;
+    return relativeTimeInline(time, now);
   }
 }

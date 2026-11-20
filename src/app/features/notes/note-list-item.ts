@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, input } from '@an
 import { RouterLink } from '@angular/router';
 import { Note } from '../../core/models/note';
 import { Clock } from '../../core/services/clock';
-import { fullDate } from '../../core/utils/date';
+import { fullDate, relativeTimeInline } from '../../core/utils/date';
 import { highlight, searchSnippet } from '../../core/utils/note-query';
 import { noteMeta } from '../../core/utils/note-text';
 import { RelativeTimePipe } from '../../shared/pipes/relative-time';
@@ -41,7 +41,7 @@ import { Icon } from '../../shared/ui/icon';
       }
       <div class="meta">
         @if (n.deletedAt) {
-          <time [title]="'Deleted ' + full(n.deletedAt)">Deleted {{ n.deletedAt | relativeTime: clock.now() }}</time>
+          <time [title]="'Deleted ' + full(n.deletedAt)">Deleted {{ deletedLabel(n.deletedAt, clock.now()) }}</time>
         } @else {
           <time [title]="'Edited ' + full(n.updatedAt)">{{ n.updatedAt | relativeTime: clock.now() }}</time>
         }
@@ -68,5 +68,9 @@ export class NoteListItem {
 
   protected full(time: number): string {
     return fullDate(time);
+  }
+
+  protected deletedLabel(time: number, now: number): string {
+    return relativeTimeInline(time, now);
   }
 }

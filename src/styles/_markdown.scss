@@ -143,6 +143,7 @@
   code {
     padding: 0.15em 0.4em;
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.86em;
     background: var(--code-bg);
     border: 1px solid var(--border);

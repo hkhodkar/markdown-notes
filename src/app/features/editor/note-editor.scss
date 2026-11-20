@@ -89,6 +89,21 @@
   }
 }
 
+.saving-dot {
+  width: 8px;
+  height: 8px;
+  margin: 0 3px;
+  background: var(--warning);
+  border-radius: 50%;
+  animation: pulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+  to {
+    opacity: 0.35;
+  }
+}
+
 .trash-banner {
   display: flex;
   align-items: center;
@@ -162,6 +177,7 @@
   padding: 24px 28px 48px;
   font-family: var(--font-mono);
   font-size: 14px;
+  font-variant-ligatures: none;
   line-height: 1.7;
   color: var(--text);
   background: var(--surface);
@@ -232,6 +248,14 @@
 
   .save-state {
     margin-right: 2px;
+  }
+
+  .save-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
   }
 
   .source {

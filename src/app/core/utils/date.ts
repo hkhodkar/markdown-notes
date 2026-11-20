@@ -24,3 +24,9 @@ export function fullDate(time: number): string {
     minute: '2-digit',
   });
 }
+
+/** relativeTime for use inside a sentence: "Edited just now", "Deleted yesterday" */
+export function relativeTimeInline(time: number, now = Date.now()): string {
+  const label = relativeTime(time, now);
+  return label === 'Just now' || label === 'Yesterday' ? label.toLowerCase() : label;
+}
