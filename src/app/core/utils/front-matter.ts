@@ -15,11 +15,11 @@ export function parseFrontMatter(text: string): ParsedMarkdown {
 
   const yaml = match[1];
   const tags: string[] = [];
-  const inline = /^tags:\s*\[(.*)\]\s*$/m.exec(yaml) ?? /^tags:\s*(\S.*)$/m.exec(yaml);
+  const inline = /^tags:[ \t]*\[(.*)\][ \t]*$/m.exec(yaml) ?? /^tags:[ \t]*(\S.*)$/m.exec(yaml);
   if (inline) {
     tags.push(...inline[1].split(',').map(unquote));
   } else {
-    const block = /^tags:\s*\n((?:\s+-\s*.+\n?)+)/m.exec(yaml);
+    const block = /^tags:[ \t]*\n((?:[ \t]+-[ \t]*.+\n?)+)/m.exec(yaml);
     if (block) tags.push(...block[1].split('\n').map((l) => unquote(l.replace(/^\s*-\s*/, ''))));
   }
   return { body: source.slice(match[0].length).replace(/^\n+/, ''), tags: normalizeTags(tags.filter(Boolean)) };
