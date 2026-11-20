@@ -74,18 +74,24 @@
     margin: 0.25em 0 0;
   }
 
-  // gfm task lists
+  // gfm task lists: checkbox hangs in the list gutter so wrapped lines align with the text
   li:has(> input[type='checkbox']),
   li:has(> p > input[type='checkbox']) {
+    position: relative;
     list-style: none;
-    margin-left: -1.4em;
+  }
+
+  li > input[type='checkbox'],
+  li > p:first-child > input[type='checkbox'] {
+    position: absolute;
+    top: 0.4em;
+    left: -1.5em;
   }
 
   input[type='checkbox'] {
     width: 15px;
     height: 15px;
-    margin: 0 8px 0 0;
-    vertical-align: -2px;
+    margin: 0;
     accent-color: var(--accent);
     cursor: pointer;
 

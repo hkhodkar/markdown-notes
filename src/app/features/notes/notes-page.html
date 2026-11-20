@@ -6,6 +6,7 @@
     (newNote)="newNote()"
     (closeDrawer)="closeDrawer()"
     (showShortcuts)="showShortcuts.set(true)"
+    (importFiles)="importFiles($event)"
   />
   @if (drawerOpen()) {
     <div class="drawer-backdrop" (click)="closeDrawer()"></div>
@@ -18,4 +19,14 @@
 
 @if (showShortcuts()) {
   <app-shortcuts-dialog (closed)="showShortcuts.set(false)" />
+}
+
+@if (dragging()) {
+  <div class="drop-overlay" aria-hidden="true">
+    <div class="drop-card">
+      <app-icon name="upload" />
+      <p class="title">Drop to import</p>
+      <p>Markdown (.md) and text files become new notes</p>
+    </div>
+  </div>
 }

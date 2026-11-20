@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, input, output, signal } from '@angular/core';
 import { NoteView } from '../../core/models/note';
+import { NoteTransfer } from '../../core/services/note-transfer';
 import { ThemeService } from '../../core/services/theme';
 import { NotesStore } from '../../core/store/notes-store';
 import { ClickOutside } from '../../shared/directives/click-outside';
@@ -26,12 +27,14 @@ export class Sidebar {
   protected readonly theme = inject(ThemeService);
   private readonly confirm = inject(ConfirmService);
   private readonly toasts = inject(ToastService);
+  protected readonly transfer = inject(NoteTransfer);
 
   readonly drawer = input(false);
   readonly navigated = output<void>();
   readonly newNote = output<void>();
   readonly closeDrawer = output<void>();
   readonly showShortcuts = output<void>();
+  readonly importFiles = output<File[]>();
 
   protected readonly views: ViewItem[] = [
     { view: 'all', label: 'All notes', icon: 'inbox' },
@@ -42,6 +45,7 @@ export class Sidebar {
 
   protected readonly tagMenu = signal<string | null>(null);
   protected readonly renaming = signal<string | null>(null);
+  protected readonly exportMenu = signal(false);
 
   protected selectView(view: NoteView): void {
     this.store.selectView(view);
@@ -51,6 +55,45 @@ export class Sidebar {
   protected selectTag(tag: string): void {
     this.store.selectTag(tag);
     this.navigated.emit();
+  }
+
+  protected onFilesPicked(input: HTMLInputElement): void {
+    const files = Array.from(input.files ?? []);
+    input.value = '';
+    if (files.length) this.importFiles.emit(files);
+  }
+
+  protected toggleExportMenu(): void {
+    this.exportMenu.update((open) => !open);
+  }
+
+  protected closeExportMenu(): void {
+    this.exportMenu.set(false);
+  }
+
+  protected exportZip(): void {
+    this.exportMenu.set(false);
+    this.transfer.exportZip();
+  }
+
+  protected exportCombined(): void {
+    this.exportMenu.set(false);
+    this.transfer.exportCombined();
+  }
+
+  protected async resetDemo(): Promise<void> {
+    this.exportMenu.set(false);
+    const ok = await this.confirm.ask({
+      title: 'Reset demo notes?',
+      message: 'All current notes, including the trash, will be replaced by the demo notes. Export your notes first if you want to keep them.',
+      confirmLabel: 'Reset notes',
+      danger: true,
+    });
+    if (ok) {
+      this.store.resetToDemo();
+      this.navigated.emit();
+      this.toasts.show('Demo notes restored');
+    }
   }
 
   protected toggleTagMenu(tag: string): void {

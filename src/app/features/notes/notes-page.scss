@@ -34,6 +34,50 @@
   display: none;
 }
 
+.drop-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+  backdrop-filter: blur(2px);
+  pointer-events: none;
+}
+
+.drop-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: min(420px, 100%);
+  padding: 40px 24px;
+  text-align: center;
+  color: var(--text-2);
+  background: var(--surface);
+  border: 2px dashed var(--accent);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+
+  app-icon {
+    width: 36px;
+    height: 36px;
+    margin-bottom: 8px;
+    color: var(--accent);
+  }
+
+  p {
+    margin: 0;
+  }
+
+  .title {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text);
+  }
+}
+
 // tablets and small laptops: sidebar slides in as a drawer
 @media (max-width: 1099px) {
   .notes-page {

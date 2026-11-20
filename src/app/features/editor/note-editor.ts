@@ -17,6 +17,7 @@ import { MarkdownRenderer } from '../../core/markdown/markdown-renderer';
 import { EditorMode } from '../../core/models/note';
 import { Breakpoints } from '../../core/services/breakpoints';
 import { Clock } from '../../core/services/clock';
+import { NoteTransfer } from '../../core/services/note-transfer';
 import { Preferences } from '../../core/services/preferences';
 import { NotesStore } from '../../core/store/notes-store';
 import { fullDate, relativeTime } from '../../core/utils/date';
@@ -63,6 +64,7 @@ export class NoteEditor {
   private readonly toasts = inject(ToastService);
   private readonly confirm = inject(ConfirmService);
   private readonly breakpoints = inject(Breakpoints);
+  private readonly transfer = inject(NoteTransfer);
   protected readonly clock = inject(Clock);
 
   private readonly source = viewChild<ElementRef<HTMLTextAreaElement>>('source');
@@ -175,6 +177,12 @@ export class NoteEditor {
     if (!note) return;
     this.store.togglePin(note.id);
     this.toasts.show(note.pinned ? 'Note unpinned' : 'Note pinned');
+  }
+
+  protected exportNote(): void {
+    this.flush();
+    const note = this.note();
+    if (note) this.transfer.exportNote(note);
   }
 
   // ---- formatting -------------------------------------------------------

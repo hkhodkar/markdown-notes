@@ -9,8 +9,10 @@ import {
 } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { Breakpoints } from '../../core/services/breakpoints';
+import { NoteTransfer } from '../../core/services/note-transfer';
 import { NotesStore } from '../../core/store/notes-store';
 import { NoteList } from './note-list';
+import { Icon } from '../../shared/ui/icon';
 import { ShortcutsDialog } from './shortcuts-dialog';
 import { Sidebar } from './sidebar';
 
@@ -21,20 +23,29 @@ function isTextField(target: EventTarget | null): boolean {
 
 @Component({
   selector: 'app-notes-page',
-  imports: [RouterOutlet, Sidebar, NoteList, ShortcutsDialog],
+  imports: [RouterOutlet, Sidebar, NoteList, ShortcutsDialog, Icon],
   templateUrl: './notes-page.html',
   styleUrl: './notes-page.scss',
-  host: { '(document:keydown)': 'onKeydown($event)' },
+  host: {
+    '(document:keydown)': 'onKeydown($event)',
+    '(dragenter)': 'onDragEnter($event)',
+    '(dragover)': 'onDragOver($event)',
+    '(dragleave)': 'onDragLeave($event)',
+    '(drop)': 'onDrop($event)',
+  },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NotesPage {
   private readonly store = inject(NotesStore);
   private readonly router = inject(Router);
+  private readonly transfer = inject(NoteTransfer);
   protected readonly breakpoints = inject(Breakpoints);
   private readonly list = viewChild.required(NoteList);
 
   protected readonly drawerOpen = signal(false);
   protected readonly showShortcuts = signal(false);
+  protected readonly dragging = signal(false);
+  private dragDepth = 0;
   protected readonly hasNote = computed(() => this.store.selectedId() !== null);
 
   constructor() {
@@ -53,6 +64,47 @@ export class NotesPage {
     const note = this.store.create({ tags: tag ? [tag] : [], pinned: this.store.view() === 'pinned' });
     this.drawerOpen.set(false);
     this.router.navigate(['/notes', note.id], { state: { focus: true } });
+  }
+
+  protected async importFiles(files: File[]): Promise<void> {
+    const created = await this.transfer.importFiles(files);
+    if (!created.length) return;
+    this.store.selectView('all');
+    this.store.clearQuery();
+    this.drawerOpen.set(false);
+    this.router.navigate(['/notes', created[0].id]);
+  }
+
+  // drag and drop of .md files anywhere on the page
+  private hasFiles(event: DragEvent): boolean {
+    return !!event.dataTransfer && Array.from(event.dataTransfer.types).includes('Files');
+  }
+
+  protected onDragEnter(event: DragEvent): void {
+    if (!this.hasFiles(event)) return;
+    event.preventDefault();
+    this.dragDepth++;
+    this.dragging.set(true);
+  }
+
+  protected onDragOver(event: DragEvent): void {
+    if (!this.hasFiles(event)) return;
+    event.preventDefault();
+    event.dataTransfer!.dropEffect = 'copy';
+  }
+
+  protected onDragLeave(event: DragEvent): void {
+    if (!this.hasFiles(event)) return;
+    this.dragDepth = Math.max(0, this.dragDepth - 1);
+    if (!this.dragDepth) this.dragging.set(false);
+  }
+
+  protected onDrop(event: DragEvent): void {
+    if (!this.hasFiles(event)) return;
+    event.preventDefault();
+    this.dragDepth = 0;
+    this.dragging.set(false);
+    this.importFiles(Array.from(event.dataTransfer!.files));
   }
 
   protected openDrawer(): void {
