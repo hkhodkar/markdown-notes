@@ -7,6 +7,7 @@ export const routes: Routes = [
     loadComponent: () => import('./features/notes/notes-page').then((m) => m.NotesPage),
     children: [
       { path: '', loadComponent: () => import('./features/editor/editor-empty').then((m) => m.EditorEmpty) },
+      { path: ':id', loadComponent: () => import('./features/editor/note-editor').then((m) => m.NoteEditor) },
     ],
   },
   { path: '**', redirectTo: 'notes' },

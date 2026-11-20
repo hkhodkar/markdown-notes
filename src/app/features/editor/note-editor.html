@@ -1,0 +1,127 @@
+@if (note(); as n) {
+  <header class="editor-header">
+    <a class="icon-btn back" routerLink="/notes" aria-label="Back to notes">
+      <app-icon name="back" />
+    </a>
+
+    @if (!trashed()) {
+      <div class="mode-switch" role="group" aria-label="Editor mode">
+        @for (m of modes; track m.value) {
+          <button
+            type="button"
+            [class]="'mode mode-' + m.value"
+            [class.active]="effectiveMode() === m.value"
+            [attr.aria-pressed]="effectiveMode() === m.value"
+            (click)="setMode(m.value)"
+          >
+            <app-icon [name]="m.icon" />
+            <span>{{ m.label }}</span>
+          </button>
+        }
+      </div>
+    }
+
+    <span class="spacer"></span>
+
+    @if (!trashed()) {
+      <span [class]="'save-state ' + saveState()" aria-live="polite">
+        @switch (saveState()) {
+          @case ('saving') {
+            Saving…
+          }
+          @case ('error') {
+            <app-icon name="alert" /> Not saved
+          }
+          @default {
+            <app-icon name="saved" /> Saved
+          }
+        }
+      </span>
+      <button
+        type="button"
+        class="icon-btn"
+        [class.active]="n.pinned"
+        [attr.aria-pressed]="n.pinned"
+        [attr.aria-label]="n.pinned ? 'Unpin note' : 'Pin note'"
+        [title]="n.pinned ? 'Unpin' : 'Pin to top'"
+        (click)="togglePin()"
+      >
+        <app-icon name="pin" />
+      </button>
+      <button type="button" class="icon-btn" aria-label="Move to trash" title="Move to trash" (click)="moveToTrash()">
+        <app-icon name="trash" />
+      </button>
+    }
+  </header>
+
+  @if (trashed()) {
+    <div class="trash-banner">
+      <app-icon name="trash" />
+      <span>This note is in the trash.</span>
+      <span class="spacer"></span>
+      <button type="button" class="btn" (click)="restore()"><app-icon name="restore" /> Restore</button>
+      <button type="button" class="btn btn-danger" (click)="deleteForever()">Delete forever</button>
+    </div>
+  } @else {
+    <div class="tags-row">
+      <app-tag-input [tags]="n.tags" [suggestions]="store.tagNames()" (tagsChange)="setTags($event)" />
+    </div>
+    @if (effectiveMode() !== 'preview') {
+      <div class="format-bar" role="toolbar" aria-label="Formatting">
+        @for (group of toolbar; track $index) {
+          @if (!$first) {
+            <span class="divider" aria-hidden="true"></span>
+          }
+          @for (button of group; track button.action) {
+            <button
+              type="button"
+              class="icon-btn"
+              [attr.aria-label]="button.label"
+              [title]="button.shortcut ? button.label + ' (' + button.shortcut + ')' : button.label"
+              (mousedown)="$event.preventDefault()"
+              (click)="format(button.action)"
+            >
+              <app-icon [name]="button.icon" />
+            </button>
+          }
+        }
+      </div>
+    }
+  }
+
+  <div class="body" [class]="'body mode-' + effectiveMode()">
+    @if (effectiveMode() !== 'preview') {
+      <textarea
+        #source
+        id="note-body"
+        class="source"
+        aria-label="Note content"
+        placeholder="# Title&#10;&#10;Start writing in markdown…"
+        spellcheck="true"
+        [value]="draft()"
+        (input)="onInput(source.value)"
+        (keydown)="onKeydown($event)"
+        (scroll)="onSourceScroll()"
+      ></textarea>
+    }
+    @if (effectiveMode() !== 'edit') {
+      <div class="preview-scroll" #preview (scroll)="onPreviewScroll()" (click)="onPreviewClick($event)">
+        @if (draft().trim()) {
+          <article class="markdown-body" [innerHTML]="html()"></article>
+        } @else {
+          <p class="preview-empty">Nothing to preview yet.</p>
+        }
+      </div>
+    }
+  </div>
+
+  <footer class="editor-footer">
+    <span>{{ stats().words }} {{ stats().words === 1 ? 'word' : 'words' }}</span>
+    <span class="dot" aria-hidden="true">·</span>
+    <span class="chars">{{ stats().characters }} characters</span>
+    <span class="dot" aria-hidden="true">·</span>
+    <span>{{ stats().readingMinutes || '<1' }} min read</span>
+    <span class="spacer"></span>
+    <span class="edited" [title]="'Created ' + full(n.createdAt)">Edited {{ edited(n.updatedAt, clock.now()) }}</span>
+  </footer>
+}

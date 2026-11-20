@@ -1,0 +1,55 @@
+<div class="tag-box" (click)="focusField()">
+  <app-icon name="tag" class="lead" />
+  @for (tag of tags(); track tag) {
+    <span class="chip">
+      #{{ tag }}
+      <button type="button" class="remove" [attr.aria-label]="'Remove tag ' + tag" (click)="remove(tag); $event.stopPropagation()">
+        <app-icon name="x" />
+      </button>
+    </span>
+  }
+  <div class="combo">
+    <input
+      #field
+      id="tag-input"
+      class="field"
+      type="text"
+      role="combobox"
+      autocomplete="off"
+      autocapitalize="off"
+      spellcheck="false"
+      aria-label="Add a tag"
+      aria-autocomplete="list"
+      aria-controls="tag-suggestions"
+      [attr.aria-expanded]="showList()"
+      [attr.aria-activedescendant]="active() >= 0 ? 'tag-option-' + active() : null"
+      [placeholder]="tags().length ? 'Add tag' : 'Add tags…'"
+      [value]="text()"
+      (input)="onInput(field.value)"
+      (keydown)="onKeydown($event)"
+      (focus)="onFocus()"
+      (blur)="onBlur()"
+    />
+    @if (showList()) {
+      <ul id="tag-suggestions" class="menu suggestions" role="listbox" aria-label="Tag suggestions">
+        @for (option of options(); track option.tag; let i = $index) {
+          <li
+            [id]="'tag-option-' + i"
+            role="option"
+            class="option"
+            [class.active]="i === active()"
+            [attr.aria-selected]="i === active()"
+            (mousedown)="$event.preventDefault()"
+            (click)="pick(option)"
+          >
+            @if (option.create) {
+              <app-icon name="plus" /> Create <strong>#{{ option.tag }}</strong>
+            } @else {
+              <app-icon name="hash" /> {{ option.tag }}
+            }
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</div>
