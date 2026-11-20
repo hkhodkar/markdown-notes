@@ -24,7 +24,10 @@ export class NotesStore {
   // list filters
   readonly view = signal<NoteView>('all');
   readonly tag = signal<string | null>(null);
+  /** what is typed in the search box; filtering follows it with a short debounce */
   readonly query = signal('');
+  private readonly appliedQuery = signal('');
+  private queryTimer?: ReturnType<typeof setTimeout>;
   readonly sort = this.prefs.sort;
 
   /** id of the note open in the editor */
@@ -47,8 +50,9 @@ export class NotesStore {
     };
   });
 
-  readonly filter = computed<NoteFilter>(() => ({ view: this.view(), tag: this.tag(), query: this.query() }));
-  readonly terms = computed(() => parseQuery(this.query()));
+  readonly filter = computed<NoteFilter>(() => ({ view: this.view(), tag: this.tag(), query: this.appliedQuery() }));
+  readonly terms = computed(() => parseQuery(this.appliedQuery()));
+  readonly searching = computed(() => this.terms().length > 0);
   readonly results = computed(() => sortNotes(filterNotes(this._notes(), this.filter()), this.sort()));
 
   /** pinned notes get their own section on top, except in views where it makes no sense */
@@ -95,6 +99,17 @@ export class NotesStore {
   selectTag(tag: string): void {
     this.view.set('all');
     this.tag.set(tag);
+  }
+
+  setQuery(query: string, debounceMs = 200): void {
+    this.query.set(query);
+    clearTimeout(this.queryTimer);
+    if (!query.trim() || debounceMs <= 0) this.appliedQuery.set(query);
+    else this.queryTimer = setTimeout(() => this.appliedQuery.set(query), debounceMs);
+  }
+
+  clearQuery(): void {
+    this.setQuery('', 0);
   }
 
   create(input: NewNote = {}): Note {
@@ -185,7 +200,7 @@ export class NotesStore {
 
   resetToDemo(): void {
     this.selectView('all');
-    this.query.set('');
+    this.clearQuery();
     this.commit(createSeedNotes());
   }
 

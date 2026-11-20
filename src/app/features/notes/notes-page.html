@@ -1,0 +1,21 @@
+<div class="notes-page" [class.has-note]="hasNote()" [class.drawer-open]="drawerOpen()">
+  <app-sidebar
+    class="pane sidebar"
+    [drawer]="breakpoints.compact()"
+    (navigated)="closeDrawer()"
+    (newNote)="newNote()"
+    (closeDrawer)="closeDrawer()"
+    (showShortcuts)="showShortcuts.set(true)"
+  />
+  @if (drawerOpen()) {
+    <div class="drawer-backdrop" (click)="closeDrawer()"></div>
+  }
+  <app-note-list class="pane list" (openMenu)="openDrawer()" (newNote)="newNote()" />
+  <main class="pane editor">
+    <router-outlet />
+  </main>
+</div>
+
+@if (showShortcuts()) {
+  <app-shortcuts-dialog (closed)="showShortcuts.set(false)" />
+}

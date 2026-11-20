@@ -1,0 +1,212 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 16px 12px 12px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 2px 6px 16px;
+
+  .name {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+  }
+
+  .close {
+    margin: -4px -4px -4px 0;
+  }
+}
+
+.logo {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  background: var(--accent);
+  border-radius: 8px;
+
+  svg {
+    width: 28px;
+    height: 28px;
+    fill: none;
+    stroke: #fff;
+    stroke-width: 2.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
+.new-note {
+  width: 100%;
+  height: 40px;
+  margin-bottom: 14px;
+
+  span {
+    flex: 1;
+    text-align: left;
+  }
+
+  kbd {
+    color: inherit;
+    background: rgba(255, 255, 255, 0.16);
+    border-color: rgba(255, 255, 255, 0.24);
+  }
+}
+
+.scroll {
+  flex: 1;
+  min-height: 0;
+  margin: 0 -12px;
+  padding: 0 12px 12px;
+  overflow-y: auto;
+}
+
+.nav {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li + li {
+    margin-top: 2px;
+  }
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  font-size: 13.5px;
+  font-weight: 500;
+  text-align: left;
+  color: var(--text-2);
+  background: none;
+  border: 0;
+  border-radius: var(--radius);
+  cursor: pointer;
+
+  app-icon {
+    width: 17px;
+    height: 17px;
+    color: var(--muted);
+  }
+
+  .label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .count {
+    font-size: 12px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &:hover {
+    color: var(--text);
+    background: var(--surface-3);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  &.active {
+    color: var(--accent-text);
+    background: var(--accent-soft);
+
+    app-icon,
+    .count {
+      color: var(--accent-text);
+    }
+  }
+}
+
+.section-title {
+  margin: 20px 10px 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.tag-row {
+  position: relative;
+
+  .tag-more {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 30px;
+    height: 30px;
+    opacity: 0;
+
+    app-icon {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  &:hover .tag-more,
+  &.menu-open .tag-more,
+  .tag-more:focus-visible {
+    opacity: 1;
+  }
+
+  &:hover .count,
+  &.menu-open .count {
+    visibility: hidden;
+  }
+
+  &:hover .nav-item,
+  &.menu-open .nav-item {
+    padding-right: 36px;
+  }
+}
+
+// touch screens have no hover, keep the options button visible
+@media (hover: none) {
+  .tag-row .tag-more {
+    opacity: 0.7;
+  }
+
+  .tag-row .count {
+    visibility: hidden;
+  }
+
+  .tag-row .nav-item {
+    padding-right: 36px;
+  }
+}
+
+.tag-menu {
+  top: 36px;
+  right: 0;
+}
+
+.empty {
+  padding: 6px 10px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}

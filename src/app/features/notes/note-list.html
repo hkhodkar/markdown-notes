@@ -1,0 +1,89 @@
+<header class="list-header">
+  <button type="button" class="icon-btn menu-btn" aria-label="Open sidebar" (click)="openMenu.emit()">
+    <app-icon name="menu" />
+  </button>
+  <div class="heading">
+    <h1>{{ heading() }}</h1>
+    <span class="count">{{ total() }} {{ total() === 1 ? 'note' : 'notes' }}</span>
+  </div>
+  @if (store.view() === 'trash') {
+    @if (store.counts().trash) {
+      <button type="button" class="btn btn-ghost empty-trash" (click)="emptyTrash()">Empty trash</button>
+    }
+  } @else {
+    <button type="button" class="icon-btn" aria-label="New note" title="New note (Alt+N)" (click)="newNote.emit()">
+      <app-icon name="compose" />
+    </button>
+  }
+</header>
+
+<div class="toolbar">
+  <div class="search">
+    <app-icon name="search" />
+    <input
+      #search
+      id="search"
+      type="search"
+      class="input"
+      placeholder="Search notes"
+      aria-label="Search notes"
+      autocomplete="off"
+      [value]="store.query()"
+      (input)="onSearch(search.value)"
+      (keydown)="onSearchKeydown($event)"
+    />
+    @if (store.query()) {
+      <button type="button" class="clear" aria-label="Clear search" (click)="clearSearch()">
+        <app-icon name="x" />
+      </button>
+    } @else {
+      <kbd class="hint">/</kbd>
+    }
+  </div>
+  <select id="sort" class="select sort" aria-label="Sort notes" [value]="store.sort()" (change)="setSort($any($event.target).value)">
+    @for (option of sortOptions; track option.value) {
+      <option [value]="option.value" [selected]="option.value === store.sort()">{{ option.label }}</option>
+    }
+  </select>
+</div>
+
+@if (store.view() === 'trash' && total()) {
+  <p class="trash-info">Notes in the trash can be restored or deleted for good.</p>
+}
+
+<div class="scroll">
+  @let sections = store.sections();
+  @if (sections.pinned.length) {
+    <h2 class="group">Pinned</h2>
+    @for (note of sections.pinned; track note.id) {
+      <app-note-list-item [note]="note" [terms]="store.terms()" [active]="note.id === store.selectedId()" />
+    }
+    @if (sections.others.length) {
+      <h2 class="group">Notes</h2>
+    }
+  }
+  @for (note of sections.others; track note.id) {
+    <app-note-list-item [note]="note" [terms]="store.terms()" [active]="note.id === store.selectedId()" />
+  }
+
+  @if (!total()) {
+    <div class="empty">
+      @if (store.searching()) {
+        <app-icon name="search" />
+        <p class="title">No matches for “{{ store.query().trim() }}”</p>
+        <p>Try another word or clear the search.</p>
+        <button type="button" class="btn" (click)="clearSearch()">Clear search</button>
+      } @else if (store.view() === 'trash') {
+        <app-icon name="trash" />
+        <p class="title">Trash is empty</p>
+        <p>Deleted notes show up here.</p>
+      } @else {
+        <app-icon name="notes" />
+        <p class="title">No notes here yet</p>
+        <button type="button" class="btn btn-primary" (click)="newNote.emit()">
+          <app-icon name="compose" /> New note
+        </button>
+      }
+    </div>
+  }
+</div>

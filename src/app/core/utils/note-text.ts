@@ -47,8 +47,11 @@ export function deriveTitle(body: string): string {
   return truncate(stripLine(firstLine), 90) || UNTITLED;
 }
 
-/** Plain text of the body (without the title line), used for excerpts and search. */
-export function toPlainText(body: string): string {
+/**
+ * Plain text of the body, one entry per line. Used for excerpts and search.
+ * With `skipHeadings` only the content is kept, which reads better in the notes list.
+ */
+function plainLines(body: string, skipHeadings = false): string[] {
   const out: string[] = [];
   let inFence = false;
   for (const line of body.split('\n')) {
@@ -57,16 +60,23 @@ export function toPlainText(body: string): string {
       continue;
     }
     if (/^\s*\|?\s*:?-{3,}/.test(line) || /^\s*([-*_])\1{2,}\s*$/.test(line)) continue;
+    if (skipHeadings && !inFence && HEADING.test(line)) continue;
     const text = inFence ? line.trim() : stripLine(line);
     if (text) out.push(text);
   }
-  return out.join(' ').replace(/\s+/g, ' ').trim();
+  return out;
+}
+
+export function toPlainText(body: string): string {
+  return plainLines(body).join(' ').replace(/\s+/g, ' ').trim();
 }
 
 export function excerpt(body: string, title: string, length = 140): string {
-  let text = toPlainText(body);
-  if (text.startsWith(title)) text = text.slice(title.length).trim();
-  return truncate(text, length);
+  const lines = plainLines(body, true);
+  if (lines[0] === title) lines.shift();
+  // separate lines that don't end in punctuation, e.g. list items
+  const text = lines.reduce((acc, line) => (!acc ? line : /[.!?:;,…]$/.test(acc) ? `${acc} ${line}` : `${acc} · ${line}`), '');
+  return truncate(text.replace(/\s+/g, ' ').trim(), length);
 }
 
 export function truncate(text: string, length: number): string {

@@ -1,0 +1,90 @@
+<div class="brand">
+  <span class="logo" aria-hidden="true">
+    <svg viewBox="0 0 32 32"><path d="M8 22V10l4.5 5.5L17 10v12" /><path d="M23 10v11m-3.5-3.5L23 21l3.5-3.5" /></svg>
+  </span>
+  <span class="name">Markdown Notes</span>
+  @if (drawer()) {
+    <button type="button" class="icon-btn close" aria-label="Close sidebar" (click)="closeDrawer.emit()">
+      <app-icon name="x" />
+    </button>
+  }
+</div>
+
+<button type="button" class="btn btn-primary new-note" (click)="newNote.emit()">
+  <app-icon name="compose" />
+  <span>New note</span>
+  <kbd>Alt N</kbd>
+</button>
+
+<nav class="scroll" aria-label="Notes">
+  <ul class="nav">
+    @for (item of views; track item.view) {
+      <li>
+        <button
+          type="button"
+          class="nav-item"
+          [class.active]="store.view() === item.view && !store.tag()"
+          [attr.aria-current]="store.view() === item.view && !store.tag() ? 'page' : null"
+          (click)="selectView(item.view)"
+        >
+          <app-icon [name]="item.icon" />
+          <span class="label">{{ item.label }}</span>
+          <span class="count">{{ store.counts()[item.view] }}</span>
+        </button>
+      </li>
+    }
+  </ul>
+
+  <h2 class="section-title">Tags</h2>
+  <ul class="nav tags">
+    @for (tag of store.tags(); track tag.name) {
+      <li class="tag-row" [class.menu-open]="tagMenu() === tag.name" (appClickOutside)="closeTagMenu(tag.name)">
+        <button
+          type="button"
+          class="nav-item"
+          [class.active]="store.tag() === tag.name"
+          [attr.aria-current]="store.tag() === tag.name ? 'page' : null"
+          (click)="selectTag(tag.name)"
+        >
+          <app-icon name="hash" />
+          <span class="label">{{ tag.name }}</span>
+          <span class="count">{{ tag.count }}</span>
+        </button>
+        <button
+          type="button"
+          class="icon-btn tag-more"
+          [attr.aria-label]="'Options for tag ' + tag.name"
+          [attr.aria-expanded]="tagMenu() === tag.name"
+          (click)="toggleTagMenu(tag.name)"
+        >
+          <app-icon name="more" />
+        </button>
+        @if (tagMenu() === tag.name) {
+          <div class="menu tag-menu" role="menu">
+            <button type="button" class="menu-item" role="menuitem" (click)="startRename(tag.name)">
+              <app-icon name="pencil" /> Rename tag
+            </button>
+            <button type="button" class="menu-item danger" role="menuitem" (click)="deleteTag(tag.name)">
+              <app-icon name="trash" /> Delete tag
+            </button>
+          </div>
+        }
+      </li>
+    } @empty {
+      <li class="empty">No tags yet. Add one from the editor.</li>
+    }
+  </ul>
+</nav>
+
+<footer class="footer">
+  <button type="button" class="icon-btn" [attr.aria-label]="theme.theme() === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'" [title]="theme.theme() === 'dark' ? 'Light theme' : 'Dark theme'" (click)="theme.toggle()">
+    <app-icon [name]="theme.theme() === 'dark' ? 'sun' : 'moon'" />
+  </button>
+  <button type="button" class="icon-btn" aria-label="Keyboard shortcuts" title="Keyboard shortcuts (?)" (click)="showShortcuts.emit()">
+    <app-icon name="keyboard" />
+  </button>
+</footer>
+
+@if (renaming(); as tag) {
+  <app-rename-tag-dialog [tag]="tag" [existing]="store.tagNames()" (renamed)="finishRename(tag, $event)" (closed)="renaming.set(null)" />
+}
